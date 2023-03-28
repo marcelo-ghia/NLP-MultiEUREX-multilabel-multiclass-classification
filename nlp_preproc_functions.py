@@ -77,3 +77,15 @@ def get_stopwords(df, text_col, id_col, stopwords=stopwords, threshold=0.5):
     word_counts_df['pct'] = word_counts_df['count']/len(df)
     frequent_words = word_counts_df.loc[word_counts_df['pct'] >= threshold, 'word'].tolist()
     return word_counts_df, frequent_words
+
+def extract_date(text):
+    """
+    This function when applied to the original text of a document will extract its publishing date and return a pd.Datetime object
+    """
+    pattern = r'(?<=of\s)(\d{1,2})\s([A-Za-z]+)\s(\d{4})'
+    match = re.search(pattern, text.lower())
+    if match:
+        date_str = match.group()
+        return pd.to_datetime(date_str, format='%d %B %Y')
+    else:
+        return np.nan
