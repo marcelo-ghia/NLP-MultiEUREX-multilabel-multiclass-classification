@@ -64,7 +64,7 @@ def get_stopwords(df, text_col, id_col, stopwords=stopwords, threshold=0.5):
         .explode()\
         .reset_index()\
         .drop_duplicates()\
-        .groupby('pp_text').size()\
+        .groupby(text_col).size()\
         .sort_values(ascending=False)
     word_counts = word_counts.to_dict()
     word_counts_df = []
