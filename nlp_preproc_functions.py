@@ -6,17 +6,12 @@ import re
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
-stopwords = nltk.corpus.stopwords.words('english')
+en_stopwords = nltk.corpus.stopwords.words('english')
+fr_stopwords = nltk.corpus.stopwords.words('french')
+es_stopwords = nltk.corpus.stopwords.words('spanish')
 
-test_data = pd.DataFrame([
-    {'id': 1234, 'text': 'This is a sentence'},
-    {'id': 1432, 'text': 'This is also a sentence'},
-    {'id': 987152, 'text': 'This is not a sentence'},
-    {'id': 5235, 'text': 'This is a book'},
-    {'id': 12361624, 'text': 'This is a collection of words'},
-])
 
-def preprocess_text(text):
+def preprocess_text_en(text):
     """
     Apply this fucntion to text to:
     1. lowercase
@@ -36,8 +31,78 @@ def preprocess_text(text):
     words = nltk.word_tokenize(text)
 
     # Remove stop words
-    stopwords = nltk.corpus.stopwords.words('english')
-    filtered_words = [word for word in words if word not in stopwords]
+    filtered_words = [word for word in words if word not in en_stopwords]
+
+    # Stem the remaining words using Porter Stemmer
+    stemmer = nltk.PorterStemmer()
+    stemmed_words = [stemmer.stem(word) for word in filtered_words]
+
+    # Lemmatize the remaining words using WordNetLemmatizer
+    lemmatizer = nltk.WordNetLemmatizer()
+    lemmatized_words = [lemmatizer.lemmatize(word) for word in stemmed_words]
+
+    # Join the preprocessed words into a single string
+    preprocessed_text = " ".join(lemmatized_words)
+
+    return preprocessed_text
+
+def preprocess_text_fr(text):
+
+    """
+    Apply this fucntion to text to:
+    1. lowercase
+    2. remove punctuation
+    3. tokenize
+    4. remove stopwords
+    5. stem
+    6. lemmatize
+    """
+    # Convert text to lowercase
+    text = text.lower()
+
+    # Remove numbers and punctuation using regex
+    text = re.sub(r'[^\w\s]', '', re.sub(r'\d+', '', text))
+
+    # Tokenize the text into words
+    words = nltk.word_tokenize(text)
+
+    # Remove stop words
+    filtered_words = [word for word in words if word not in fr_stopwords]
+
+    # Stem the remaining words using Porter Stemmer
+    stemmer = nltk.PorterStemmer()
+    stemmed_words = [stemmer.stem(word) for word in filtered_words]
+
+    # Lemmatize the remaining words using WordNetLemmatizer
+    lemmatizer = nltk.WordNetLemmatizer()
+    lemmatized_words = [lemmatizer.lemmatize(word) for word in stemmed_words]
+
+    # Join the preprocessed words into a single string
+    preprocessed_text = " ".join(lemmatized_words)
+
+    return preprocessed_text
+
+def preprocess_text_es(text):
+    """
+    Apply this fucntion to text to:
+    1. lowercase
+    2. remove punctuation
+    3. tokenize
+    4. remove stopwords
+    5. stem
+    6. lemmatize
+    """
+    # Convert text to lowercase
+    text = text.lower()
+
+    # Remove numbers and punctuation using regex
+    text = re.sub(r'[^\w\s]', '', re.sub(r'\d+', '', text))
+
+    # Tokenize the text into words
+    words = nltk.word_tokenize(text)
+
+    # Remove stop words
+    filtered_words = [word for word in words if word not in es_stopwords]
 
     # Stem the remaining words using Porter Stemmer
     stemmer = nltk.PorterStemmer()
@@ -105,7 +170,7 @@ def impute_timestamps(df, col):
     df[col] = df[col].fillna(median_time)
     return df
     
-def get_eu_legal_type(df, col):
+def get_eu_legal_type_en(df, col):
     """
     Each document has a title like "Commission Regulation" or "Regulation of the European Parliament and of the Council". This states who released the document,
     and the purpose of the document. This function will create dummy variables about who released it (commission, parliament, council, committee), and what kind of document itis
@@ -175,6 +240,169 @@ def get_eu_legal_type(df, col):
         {'title': 'Decision Of The European Council', 'decision': 1, 'council': 1},
         {'title': 'Council Implementing Decision', 'decision': 1, 'council': 1},
         {'title': 'Decision Of The European Central Bank', 'decision': 1}
+    ]
+
+    # Create DataFrame from list of dictionaries
+    doc_types = pd.DataFrame(doc_type_map)
+
+    # Replace missing values with 0
+    doc_types = doc_types.fillna(0)
+
+    merged_df = pd.merge(df, doc_types, how='left', left_on='doc_type', right_on='title').fillna(0)
+    merged_df = merged_df.drop(columns=['doc_type', 'title'], axis=1).reset_index()
+    return merged_df
+
+def get_eu_legal_type_fr(df, col):
+    def get_text_type(text):
+        text = text.lower()
+
+        # First, we get edge cases (these are older documents that have more verbose titles)
+        regex_patterns = [
+            r"(directive)(.*)(du parlement européen et du conseil)",
+            r"(décision)(.*)(du parlement européen et du conseil)",
+            r"(décision)(.*)(du conseil européen)",
+            r"(décision)(.*)(du conseil européen)",
+            r"(règlement)(.*)(du parlement européen et du conseil)",
+            r"(décision)(.*)(du parlement européen et du conseil)",
+            r"(directive)(.*)(du parlement européen et du conseil)",
+            r"(règlement)(.*)(du conseil)",
+        ]
+
+        for pattern in regex_patterns:
+            match = re.search(pattern, text)
+            if match:
+                return f"{match.group(1).title()} {match.group(3).title()}"
+
+        # Now we get more common names
+        legal_types = [
+            "règlement de la commission",
+            "décision de la commission",
+            "règlement du conseil",
+            "directive du conseil",
+            "décision du conseil",
+            "règlement d'exécution de la commission",
+            "règlement délégué de la commission",
+            'décision du conseil et de la commission',
+            'décision du comité politique et de sécurité',
+            'décision du parlement européen',
+            'décision du parlement européen',
+            'directive de la commission',
+            'décision du conseil',
+            'décision de la banque centrale européenne',
+            'décision d’exécution du conseil',
+        ]
+        regex = r"\b(" + "|".join(legal_types) + r")\b"
+        match = re.search(regex, text)
+        if match:
+            return match.group(1).title()
+        else:
+            return np.nan
+
+    df['doc_type'] = df[col].apply(get_text_type)
+    
+    # Modify the doc_type_map with the French legal types
+    doc_type_map = [
+    {'title': 'Règlement De La Commission', 'commission': 1, 'regulation': 1},
+    {'title': 'Décision De La Commission', 'commission': 1, 'decision': 1},
+    {'title': 'Règlement Du Conseil', 'council': 1, 'regulation': 1},
+    {'title': 'Décision Du Conseil', 'council': 1, 'decision': 1},
+    {'title': 'Directive Du Parlement Européen Et Du Conseil', 'directive': 1, 'parliament': 1, 'council': 1},
+    {'title': 'Directive Du Conseil', 'directive': 1, 'council': 1},
+    {'title': 'Règlement Du Parlement Européen Et Du Conseil', 'regulation': 1, 'parliament': 1, 'council': 1},
+    {'title': 'Directive De La Commission', 'directive': 1, 'commission': 1},
+    {'title': 'Règlement Du Conseil', 'regulation': 1, 'council': 1},
+    {'title': 'Décision Du Parlement Européen Et Du Conseil', 'decision': 1, 'council': 1, 'parliament': 1},
+    {'title': 'Décision Du Parlement Européen', 'decision': 1, 'parliament': 1},
+    {'title': 'Décision Du Comité Politique Et De Sécurité', 'decision': 1, 'committee': 1},
+    {'title': 'Décision Du Parlement Européen', 'decision': 1, 'parliament': 1},
+    {'title': 'Décision Du Conseil Et De La Commission', 'decision': 1, 'council': 1, 'commission': 1},
+    {'title': 'Décision Du Conseil', 'decision': 1, 'council': 1},
+    {'title': 'Décision Du Conseil Européen', 'decision': 1, 'council': 1},
+    {'title': 'Décision D’Exécution Du Conseil', 'decision': 1, 'council': 1},
+    {'title': 'Décision De La Banque Centrale Européenne', 'decision': 1}
+    ]
+
+
+    # Create DataFrame from list of dictionaries
+    doc_types = pd.DataFrame(doc_type_map)
+
+    # Replace missing values with 0
+    doc_types = doc_types.fillna(0)
+
+    merged_df = pd.merge(df, doc_types, how='left', left_on='doc_type', right_on='title').fillna(0)
+    merged_df = merged_df.drop(columns=['doc_type', 'title'], axis=1).reset_index()
+    return merged_df
+
+def get_eu_legal_type_es(df, col):
+    """
+    Each document has a title like "Reglamento de la Comisión" or "Reglamento del Parlamento Europeo y del Consejo". This states who released the document,
+    and the purpose of the document. This function will create dummy variables about who released it (commission, parliament, council, committee), and what kind of document it is
+    (decision, regulation, directive). 
+    """
+    def get_text_type(text):
+        text = text.lower()
+        
+        # First we get edge cases (these are older documents that have more verbose titles)
+        regex_patterns = [
+            r"(directiva)(.*)(del parlamento europeo y del consejo)",
+            r"(decisión)(.*)(del parlamento europeo y del consejo)",
+            r"(decisión)(.*)(del consejo europeo)",
+            r"(decisión)(.*)(del consejo europeo)",
+            r"(reglamento)(.*)(del parlamento europeo y del consejo)",
+            r"(decisión)(.*)(del parlamento europeo y del consejo)",
+            r"(directiva)(.*)(del parlamento europeo y del consejo)",
+            r"(reglamento)(.*)(del consejo)",
+        ]
+
+        for pattern in regex_patterns:
+            match = re.search(pattern, text)
+            if match:
+                return f"{match.group(1).title()} {match.group(3).title()}"
+        # Now we get more common names
+        legal_types = [
+            "reglamento de la comisión", 
+            "decisión de la comisión", 
+            "reglamento del consejo",
+            "directiva del consejo", 
+            "decisión del consejo", 
+            "reglamento de aplicación de la comisión",
+            "reglamento delegado de la comisión", 
+            'decisión del consejo y de la comisión', 
+            'decisión del comité político y de seguridad', 
+            'decisión del parlamento europeo',
+            'decisión del parlamento europeo', 
+            'directiva de la comisión', 
+            'decisión del consejo', 
+            'decisión del banco central europeo', 
+            'decisión de aplicación del consejo',
+            ]
+        regex = r"\b(" + "|".join(legal_types) + r")\b"
+        match = re.search(regex, text)
+        if match:
+            return match.group(1).title()
+        else:
+            return np.nan
+    df['doc_type'] = df[col].apply(get_text_type)
+    # List of dictionaries
+    doc_type_map = [
+        {'title': 'Reglamento De La Comisión', 'commission': 1, 'regulation': 1},
+        {'title': 'Decisión De La Comisión', 'commission': 1, 'decision': 1},
+        {'title': 'Reglamento Del Consejo', 'council': 1, 'regulation': 1},
+        {'title': 'Decisión Del Consejo', 'council': 1, 'decision': 1},
+        {'title': 'Directiva Del Parlamento Europeo Y Del Consejo', 'directive': 1, 'parliament': 1, 'council': 1},
+        {'title': 'Directiva Del Consejo', 'directive': 1, 'council': 1},
+        {'title': 'Reglamento Del Parlamento Europeo Y Del Consejo', 'regulation': 1, 'parliament': 1, 'council': 1},
+        {'title': 'Directiva De La Comisión', 'directive': 1, 'commission': 1},
+        {'title': 'Reglamento Del Consejo', 'regulation': 1, 'council': 1},
+        {'title': 'Decisión Del Parlamento Europeo Y Del Consejo', 'decision': 1, 'council': 1, 'parliament': 1},
+        {'title': 'Decisión Del Parlamento Europeo', 'decision': 1, 'parliament': 1},
+        {'title': 'Decisión Del Comité Político Y De Seguridad', 'decision': 1, 'committee': 1},
+        {'title': 'Decisión Del Parlamento Europeo', 'decision': 1, 'parliament': 1},
+        {'title': 'Decisión Del Consejo Y De La Comisión', 'decision': 1, 'council': 1, 'commission': 1},
+        {'title': 'Decisión Del Consejo', 'decision': 1, 'council': 1},
+        {'title': 'Decisión Del Consejo Europeo', 'decision': 1, 'council': 1},
+        {'title': 'Decisión De Aplicación Del Consejo', 'decision': 1, 'council': 1},
+        {'title': 'Decisión Del Banco Central Europeo', 'decision': 1}
     ]
 
     # Create DataFrame from list of dictionaries
