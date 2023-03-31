@@ -186,3 +186,19 @@ def get_eu_legal_type(df, col):
     merged_df = pd.merge(df, doc_types, how='left', left_on='doc_type', right_on='title').fillna(0)
     merged_df = merged_df.drop(columns=['doc_type', 'title'], axis=1).reset_index()
     return merged_df
+
+def clean_label(s):
+    result = []
+    temp_str = ''
+    
+    for idx, char in enumerate(s):
+        if char.isdigit():
+            temp_str += char
+            if idx == len(s) - 1:  # Check if it's the last character in the string
+                result.append(temp_str)
+        else:
+            if temp_str:
+                result.append(temp_str)
+                temp_str = ''
+                
+    return result
