@@ -4,3 +4,6 @@ data/test.jsonl
 data/train.jsonl
 *.csv
 log_reg_model.pkl
+data/full_english_dataset/test_en
+data/full_english_dataset/train_en
+data/full_english_dataset/validation

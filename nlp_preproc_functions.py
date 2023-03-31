@@ -90,22 +90,20 @@ def extract_date(text):
     """
     pattern = r'(?<=of\s)(\d{1,2})\s([A-Za-z]+)\s(\d{4})'
     match = re.search(pattern, text.lower())
-    if match:
-        date_str = match.group()
-        return pd.to_datetime(date_str, format='%d %B %Y')
-    else:
-        return np.nan
+    try: 
+        if match:
+            date_str = match.group()
+            return pd.to_datetime(date_str, format='%d %B %Y')
+        else:
+            return pd.NaT
+    except ValueError:
+        return pd.NaT
     
-
-def extract_date(text):
-    pattern = r'(?<=of\s)(\d{1,2})\s([A-Za-z]+)\s(\d{4})'
-    
-    match = re.search(pattern, text.lower())
-    if match:
-        date_str = match.group()
-        return pd.to_datetime(date_str, format='%d %B %Y')
-    else:
-        return np.nan
+def impute_timestamps(df, col):
+    median_time = df[col].astype(int).median()
+    median_time = pd.to_datetime(median_time)
+    df[col] = df[col].fillna(median_time)
+    return df
     
 def get_eu_legal_type(df, col):
     """
