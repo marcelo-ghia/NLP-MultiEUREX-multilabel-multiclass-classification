@@ -7,3 +7,11 @@ log_reg_model.pkl
 data/full_english_dataset/test_en
 data/full_english_dataset/train_en
 data/full_english_dataset/validation
+baseline/data/full_english_dataset/english_all_pp.zip
+baseline/data/full_english_dataset/test_en
+baseline/data/full_english_dataset/train_en
+baseline/data/full_english_dataset/validation
+.DS_Store
+baseline/data/test.jsonl
+baseline/data/train.jsonl
+baseline/data/dev.jsonl

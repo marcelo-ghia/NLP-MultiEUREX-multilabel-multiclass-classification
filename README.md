@@ -4,8 +4,8 @@ To run code please install requirements.txt with package versions first
 
 Main file: NLP-project-summary.ipynb
 
-In the folders you can find file for each model type and utility functions 
-needed
+In the folders you can find files for each model type and utility functions 
+needed. Our shared library for preprocessing functions are located in the main directory. 
 
 
 Documents
@@ -19,3 +19,6 @@ The following data fields are provided for documents (train, dev, test):
 celex_id: (str) The official ID of the document. The CELEX number is the unique identifier for all publications in both Eur-Lex and CELLAR.
 text: (str) The full content of each document across languages.
 labels: (List[int]) The relevant EUROVOC concepts (labels).
+
+
+
