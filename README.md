@@ -33,4 +33,4 @@ We preprocessed the data by performing the following operations:</br>
 - [x] stem and lemmatize</br>
 
 **Models**
-For mor answers on the models, please visit __NLP-project-summary.ipynb__
+For mor answers on the models, please visit [__NLP-project-summary.ipynb__](https://github.com/jon-robbins/nlp-final/blob/main/NLP-project-summary.ipynb)
