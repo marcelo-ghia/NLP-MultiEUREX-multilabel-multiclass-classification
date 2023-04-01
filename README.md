@@ -27,7 +27,10 @@ French and English had the highest dataset at 55k, followed by the Spanish at 23
 
 **Preprocessing**
 We preprocessed the data by performing the following operations:</br>
-[x] Remove the punctuation and stopwords</br>
-[x] make all text lowercase</br>
-[x] tokenize</br>
-[x] stem and lemmatize</br>
+- [x] Remove the punctuation and stopwords</br>
+- [x] make all text lowercase</br>
+- [x] tokenize</br>
+- [x] stem and lemmatize</br>
+
+**Models**
+For mor answers on the models, please visit __NLP-project-summary.ipynb__
