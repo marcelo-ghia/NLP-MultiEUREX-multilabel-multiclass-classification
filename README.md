@@ -18,19 +18,19 @@ _celex_id_: (str) The official ID of the document. The CELEX number is the uniqu
 _text_: (str) The full content of each document across languages.
 _labels_: (List[int]) The relevant EUROVOC concepts (labels).
 
-**Aim**
+**Aim**</br>
 The aim of this project is to predict document classification using MultiEURLEX dataset from huggingface, which includes over 23 languages, and we chose 3 languages. We initially wanted to take 3 languages from three language families but decided to stick with _English_, _French_, and _Spanish_. 
 We use a non-ML baseline model, an LSTM model, and a BERT model for the classification task.
 
-**Data**
+**Data**</br>
 French and English had the highest dataset at 55k, followed by the Spanish at 23k. We split it into train, validation and test. 
 
-**Preprocessing**
+**Preprocessing**</br>
 We preprocessed the data by performing the following operations:</br>
 - [x] Remove the punctuation and stopwords</br>
 - [x] make all text lowercase</br>
 - [x] tokenize</br>
 - [x] stem and lemmatize</br>
 
-**Models**
-For mor answers on the models, please visit [__NLP-project-summary.ipynb__](https://github.com/jon-robbins/nlp-final/blob/main/NLP-project-summary.ipynb)
+**Models**</br>
+For mor answers on the models, please visit [__NLP-project-summary.ipynb__](https://github.com/jon-robbins/nlp-final/blob/main/NLP-project-summary.ipynb) and also we have several notebooks with the RNN and BERT model. 
