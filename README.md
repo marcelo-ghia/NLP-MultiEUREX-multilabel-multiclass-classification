@@ -23,8 +23,11 @@ The aim of this project is to predict document classification using MultiEURLEX 
 We use a non-ML baseline model, an LSTM model, and a BERT model for the classification task.
 
 **Data**
-French and English had the highest dataset at 55k, followed by the Spanish at 23k. 
+French and English had the highest dataset at 55k, followed by the Spanish at 23k. We split it into train, validation and test. 
 
-Please note the following important contents of the repository:
-![nlp_preproc_functions.py]
-(https://github.com/jon-robbins/nlp-final/blob/main/nlp_preproc_functions.py)
+**Preprocessing**
+We preprocessed the data by performing the following operations:
+[x] Remove the punctuation and stopwords
+[x] make all text lowercase
+[x] tokenize
+[x] stem and lemmatize
