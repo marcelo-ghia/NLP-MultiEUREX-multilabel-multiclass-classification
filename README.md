@@ -5,7 +5,7 @@ To run code please install requirements.txt with package versions first
 Main file: NLP-project-summary.ipynb
 
 In the folders you can find files for each model type and utility functions 
-needed. Our shared library for preprocessing functions are located in the main directory. 
+needed. Our shared library for preprocessing functions are located in the main directory.  
 
 
 Documents
