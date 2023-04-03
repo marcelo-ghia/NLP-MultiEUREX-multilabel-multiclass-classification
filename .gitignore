@@ -15,3 +15,6 @@ baseline/data/full_english_dataset/validation
 baseline/data/test.jsonl
 baseline/data/train.jsonl
 baseline/data/dev.jsonl
+*.zip
+*.pkl
+*.zip
